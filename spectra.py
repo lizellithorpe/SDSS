@@ -34,8 +34,8 @@ class Spectrum(object):
 	def flux(self):
 		with fits.open(self.filename) as f:
 			self.f=f
-			flux=np.zeros(4605)
-			for k in range(4605):
+			flux=np.zeros(4606)
+			for k in range(4606):
 				flux[k]=self.f[1].data[k][0]
 		return(flux)
 		
@@ -44,8 +44,8 @@ class Spectrum(object):
 	def wavelength(self):
 		with fits.open(self.filename) as f:
 			self.f=f
-			wavelength=np.zeros(4605)
-			for k in range(4605):
+			wavelength=np.zeros(4606)
+			for k in range(4606):
 				wavelength[k]=self.f[1].data[k][1]
 		return(wavelength)
 				
