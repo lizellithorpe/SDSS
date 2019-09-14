@@ -18,7 +18,7 @@ class Spectrum(object):
 		self.absorb=None
 		self._continuum=None
 		self._flux_norm=None
-		
+####By Liz		
 	@property
 	def hdu_lengths(self):
 		header_length=len(self.f)
@@ -120,7 +120,7 @@ class Spectrum(object):
 		return(emission_lines_arr,absorption_lines_arr)
 		
 		
-	
+#####By Jordan VN	
 	@property
 	def continuum(self):
 		if self._continuum is None:
