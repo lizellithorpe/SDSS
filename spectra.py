@@ -2,6 +2,13 @@
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
+from astropy.modeling import models
+import astropy.units as u
+from specutils import Spectrum1D, SpectralRegion
+from specutils.manipulation import noise_region_uncertainty
+from specutils.fitting import find_lines_threshold
+import specutils.fitting.continuum as sfc
+
 class Spectrum(object):
 	def __init__(self,filename=None):
 		self.filename=filename
@@ -9,6 +16,8 @@ class Spectrum(object):
 			self.f = f
 		self.emit=None
 		self.absorb=None
+		self._continuum=None
+		self._flux_norm=None
 		
 	@property
 	def hdu_lengths(self):
@@ -34,6 +43,9 @@ class Spectrum(object):
 
 	@property	
 	def flux(self):
+		'''
+		Finds flux values of SDSS spectrum.
+		'''
 		with fits.open(self.filename) as f:
 			self.f=f
 			length=self.f[1].header["NAXIS2"]
@@ -45,6 +57,9 @@ class Spectrum(object):
 	
 	@property	
 	def wavelength(self):
+		'''
+		Finds wavelength array for spectrum fits file (SDSS).
+		'''
 		with fits.open(self.filename) as f:
 			self.f=f
 			length=self.f[1].header["NAXIS2"]
@@ -55,14 +70,14 @@ class Spectrum(object):
 	
 		
 	def findlines(self):
+		'''
+		Returns arrays with wavelength positions of absorption and emission lines.
+		'''
+		
 		wavelength=self.wavelength
 		flux=self.flux
 		
-		from astropy.modeling import models
-		import astropy.units as u
-		from specutils import Spectrum1D, SpectralRegion
-		from specutils.manipulation import noise_region_uncertainty
-		from specutils.fitting import find_lines_threshold
+
 		
 		spectrum=Spectrum1D(flux=flux*u.Jy,spectral_axis=wavelength*u.Angstrom)
 		noise_region=SpectralRegion(3000*u.Angstrom,10000*u.Angstrom)
@@ -103,6 +118,22 @@ class Spectrum(object):
 		self.absorb=absorption_lines_arr
 		
 		return(emission_lines_arr,absorption_lines_arr)
+		
+		
+	
+	@property
+	def continuum(self):
+		if self._continuum is None:
+			spectrum = Spectrum1D(flux=self.flux*u.Unit('W m-2 angstrom-1 sr-1'), spectral_axis=self.wavelength*u.angstrom)
+			g1_fit = sfc.fit_generic_continuum(spectrum)
+			self._continuum = g1_fit(self.wavelength*u.angstrom)
+		return(self._continuum)
+    
+	@property
+	def flux_norm(self):
+		if self._flux_norm == None:
+			self._flux_norm = self.flux / self.continuum
+		return(self._flux_norm)
 		
 		
 	
